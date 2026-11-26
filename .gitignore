@@ -1,0 +1,27 @@
+# Java compiler output
+*.class
+
+# Go build and test output
+*.test
+*.out
+/bookapi
+/http
+/backend
+
+# Node.js and Next.js build output
+node_modules/
+.next/
+out/
+*.tsbuildinfo
+
+# Local environment files
+.env
+.env.*
+!.env.example
+
+# IDE files
+.idea/
+*.iml
+.vscode/
+
+java

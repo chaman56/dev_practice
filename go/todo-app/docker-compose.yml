@@ -1,0 +1,55 @@
+services:
+  todo-db:
+    image: postgres:16
+    container_name: todo-db
+    environment:
+      POSTGRES_USER: todo_user
+      POSTGRES_PASSWORD: todo_password
+      POSTGRES_DB: todo_db
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U todo_user -d todo_db"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  todo-backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: todo-backend
+    depends_on:
+      todo-db:
+        condition: service_healthy
+    environment:
+      PGHOST: todo-db
+      PGPORT: "5432"
+      PGUSER: todo_user
+      PGPASSWORD: todo_password
+      PGDATABASE: todo_db
+      PGSSLMODE: disable
+      LISTEN_ADDR: ":8080"
+    ports:
+      - "8080:8080"
+    restart: unless-stopped
+
+  todo-frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: todo-frontend
+    depends_on:
+      todo-backend:
+        condition: service_started
+    environment:
+      NEXT_PUBLIC_API_URL: http://localhost:8080
+    ports:
+      - "3000:3000"
+    restart: unless-stopped
+
+volumes:
+  pgdata:
